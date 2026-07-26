@@ -2,7 +2,7 @@
 ;;Only god knows how it works.
 ;Please to anyone contributing increase the counter to show the total amount of hours wasted on this dumpsterfire.
 ;Ty yall
-;Hours wasted:
+;Hours wasted: 1
 ;Also this lib is useful for me to not care about libc.
 
 define i64 @syscall(i64 %call, i64 %rdi, i64 %rsi, i64 %rdx, i64 %r10, i64 %r9, i64 %r8) alwaysinline {
@@ -26,8 +26,9 @@ define void @_start() naked {
   %argv = getelementptr i8, ptr %rsp, i64 8
 
   ;Call main finally. Yipee...
-  call i64 @main(i64 %argc, ptr %argv)
-  ret void
+  %exitcode = call i64 @main(i64 %argc, ptr %argv)
+  call void @exit(i64 %exitcode)
+  unreachable
 }
 
 ;exit does not happen magically
