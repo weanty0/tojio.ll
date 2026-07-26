@@ -4,6 +4,8 @@
 ;Ty yall
 ;Hours wasted: 1
 ;Also this lib is useful for me to not care about libc.
+;
+;Footnote: this only works for x86_64 linux
 
 define i64 @syscall(i64 %call, i64 %rdi, i64 %rsi, i64 %rdx, i64 %r10, i64 %r8, i64 %r9) alwaysinline {
   ;Movin all the shit for a single syscall... Why...
@@ -37,5 +39,19 @@ define void @exit(i64 %exitcode) alwaysinline noreturn {
 
   ;this is just for letting me sleep peacefully at night
   call void asm sideeffect "hlt", ""() noreturn
+  unreachable
+}
+
+;we need a write since we dont have printf
+define i64 @write(i64 %fd, ptr %buf, i64 %count) alwaysinline {
+  %nob_written = call i64 @syscall(i64 1, i64 %fd, ptr %buf, i64 %count, i64 undef, i64 undef, i64 undef)
+  %io_err_chk = icmp eq i64 %nob_written, %count
+  br i1 %io_err_chk, label %ok, label %ioerr
+ok:
+  ;ret the number of bytes written if its the same as the count of bytes
+  ret i64 %nob_written
+ioerr:
+  ;exit with an io error
+  call void @exit(i64 1)
   unreachable
 }
