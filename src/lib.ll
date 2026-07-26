@@ -5,20 +5,20 @@
 ;Hours wasted: 1
 ;Also this lib is useful for me to not care about libc.
 
-define i64 @syscall(i64 %call, i64 %rdi, i64 %rsi, i64 %rdx, i64 %r10, i64 %r9, i64 %r8) alwaysinline {
+define i64 @syscall(i64 %call, i64 %rdi, i64 %rsi, i64 %rdx, i64 %r10, i64 %r8, i64 %r9) alwaysinline {
   ;Movin all the shit for a single syscall... Why...
-  %rax = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10}
-                                  ,{r9},{r8},~{rcx}, ~{r11}"(i64 %call,
-                                  i64 %rdi, i64 %rsi, i64 %rdx, i64 %r10, i64 %r9, i64 %r8)
-
+  %rax = call i64 asm sideeffect "syscall", "={rax},{rax},{rdi},{rsi},{rdx},{r10},{r8},{r9},~{rcx},~{r11}"(i64 %call, i64 %rdi, i64 %rsi, i64 %rdx, i64 %r10, i64 %r8, i64 %r9)
   ret i64 %rax
 }
+
+;declaring that main exsits so no brain infarct
+declare i64 @main(i64 %argc, ptr %argv)
 
 ;starting a program
 define void @_start() naked {
   ;Accessing rsp and clearing base ptr
-  call void asm sideeffect "", "={rbp}"(i64 0)
-  %rsp = call ptr asm "", "={rsp},{rsp}"(ptr undef)
+  call void asm sideeffect "xorq %rbp, %rbp", "~{rbp}"()
+  %rsp = call ptr asm "", "={rsp}"()
 
   ;deref rsp to get argc
   %argc = load i64, ptr %rsp
